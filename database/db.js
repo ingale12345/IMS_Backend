@@ -8,12 +8,12 @@ async function connectDB() {
   const con = await mongoose.connect(db_url);
   if (con) {
     console.log(`Connected to Database : ${db_url}`);
-    let user = await User.findOne({ email: "nitin@gmail.com" });
+    let user = await User.findOne({ email: "nitinn@valueaddsofttech.com" });
     if (user) return;
     user = new User({
       firstName: "Nitin",
       lastName: "Nimangare",
-      email: "nitin@gmail.com",
+      email: "nitinn@valueaddsofttech.com",
       phone: "9730828016",
       userName: "NITIN123",
       password: "password",
