@@ -3,11 +3,71 @@ const multer = require("multer");
 const bcrypt = require("bcrypt");
 const lodash = require("lodash");
 const router = express.Router();
+const sendMail = require("./forgotPasswordMail");
 const fs = require("fs");
 const { User, userSchema } = require("../Models/userModel");
 const sharp = require("sharp");
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
+router.post("/generateOTP", async (req, res) => {
+  function randomString(length) {
+    let chars = "0123456789";
+    var result = "";
+    for (var i = length; i > 0; --i)
+      result += chars[Math.floor(Math.random() * chars.length)];
+    return result;
+  }
+
+  const user = await User.findOne({ email: req.body.email });
+  if (user) {
+    const otp = randomString(6);
+    sendMail(req.body.email, otp);
+    user.otp = otp;
+    await user.save();
+    return res.status(200).send({ email: req.body.email, otpStatus: "sent" });
+  } else {
+    return res.status(200).send({ email: "", otpStatus: "Invalid Email" });
+  }
+});
+
+router.post("/validateOTP", async (req, res) => {
+  const user = await User.findOne({ email: req.body.email });
+  if (user) {
+    if (user.otp === req.body.otp) {
+      user.otp = null;
+      await user.save();
+      return res
+        .status(200)
+        .send({ email: req.body.email, otpStatus: "verified" });
+    } else {
+      return res
+        .status(200)
+        .send({ email: req.body.email, otpStatus: "Invalid otp" });
+    }
+  } else {
+    return res.status(200).send({ email: "", otpStatus: "Invalid Email" });
+  }
+});
+
+router.patch("/changePassword", async (req, res) => {
+  console.log(req.body.email);
+  const user = await User.findOne({ email: req.body.email });
+  if (user) {
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(req.body.password, salt);
+    const result = await user.save();
+    if (result)
+      return res.status(200).send({ email: "", otpStatus: "passwordChanged" });
+    else
+      return res
+        .status(400)
+        .send({ email: "", otpStatus: "Unable to change password" });
+  } else {
+    return res.status(200).send({ email: "", otpStatus: "Invalid Email" });
+  }
+  // return res.status(200).send("Demo");
+});
+
 router.post("/", upload.single("profile"), async (req, res) => {
   const img = fs.readFileSync(
     "D:\\Mudik_Trainee\\NODE JS\\Inventory\\NoProfile.jpg"
@@ -56,6 +116,7 @@ router.post("/", upload.single("profile"), async (req, res) => {
     console.log(error);
   }
 });
+
 router.patch("/:id", upload.single("profile"), async (req, res) => {
   const img = fs.readFileSync(
     "D:\\Mudik_Trainee\\NODE JS\\Inventory\\NoProfile.jpg"
