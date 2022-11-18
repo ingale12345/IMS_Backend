@@ -20,6 +20,7 @@ const userSchema = new mongoose.Schema({
   },
   email: {
     type: String,
+    unique: true,
     required: true,
     minLength: [5, "Email should not be less than 5 letters"],
     maxLength: [255, "Email should not be greater than 255 letters"],
@@ -68,6 +69,12 @@ const userSchema = new mongoose.Schema({
     type: Date,
     required: true,
     default: new Date(),
+  },
+  otp: {
+    type: String,
+    minLength: [6, "OTP should not less than 6 letters"],
+    maxLength: [6, "OTP should not be greater than 6 letters"],
+    default: null,
   },
   profile: {
     image: {
