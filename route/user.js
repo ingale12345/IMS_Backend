@@ -69,9 +69,7 @@ router.patch("/changePassword", async (req, res) => {
 });
 
 router.post("/", upload.single("profile"), async (req, res) => {
-  const img = fs.readFileSync(
-    "D:\\Mudik_Trainee\\NODE JS\\Inventory\\NoProfile.jpg"
-  );
+  const img = fs.readFileSync("D://project_Backend//NoProfile.jpg");
   const buffer = await sharp(req.file?.buffer || img)
     .resize({ width: 250, height: 250 })
     .toBuffer();
@@ -118,9 +116,7 @@ router.post("/", upload.single("profile"), async (req, res) => {
 });
 
 router.patch("/:id", upload.single("profile"), async (req, res) => {
-  const img = fs.readFileSync(
-    "D:\\Mudik_Trainee\\NODE JS\\Inventory\\NoProfile.jpg"
-  );
+  const img = fs.readFileSync("D://project_Backend//NoProfile.jpg");
 
   let user;
   if (!req.file) {
@@ -241,6 +237,41 @@ router.put("/:id", async (req, res) => {
   } catch (error) {
     console.log(error);
   }
+});
+
+router.post("/count", async (req, res) => {
+  const { title } = req.body;
+
+  let query = {};
+
+  if (!title) {
+    let users = await User.find(query);
+
+    return res.send(users.length - 1 + "");
+  }
+  query["firstName"] = new RegExp(`^${title}`, "i");
+  const totalNoOfUsers = await User.find(query).countDocuments();
+  res.status(200).send(totalNoOfUsers + "");
+});
+
+router.post("/pfs", async (req, res) => {
+  const { pageSize, currentPage, title } = req.body;
+
+  let skip = 0;
+  let limit = 0;
+  let query = {};
+  if (pageSize && currentPage) {
+    skip = (currentPage - 1) * pageSize;
+    limit = pageSize;
+  }
+
+  if (title) {
+    query["firstName"] = new RegExp(`^${title}`, "i");
+  }
+
+  let users = await User.find(query).limit(limit).skip(skip);
+  // console.log({ movies });
+  res.send(users);
 });
 
 module.exports = router;

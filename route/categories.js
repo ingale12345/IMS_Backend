@@ -7,9 +7,7 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 const fs = require("fs");
 router.post("/", upload.single("profile"), async (req, res) => {
-  const img = fs.readFileSync(
-    "D:\\Mudik_Trainee\\NODE JS\\Inventory\\NoImage.jpg"
-  );
+  const img = fs.readFileSync("D://project_Backend//NoImage.jpg");
   const category = new Categories({
     name: req.body.name,
     profile: {
@@ -108,5 +106,42 @@ router.delete("/:id", async (req, res) => {
   } catch (error) {
     console.log("Unable to delete Category==>" + error);
   }
+});
+
+router.post("/count", async (req, res) => {
+  const { title } = req.body;
+
+  // console.log({ title, genre });
+  let query = {};
+
+  // console.log(query);
+  if (!title) {
+    let categories = await Categories.find(query);
+
+    return res.send(categories.length + "");
+  }
+  query["name"] = new RegExp(`^${title}`, "i");
+  const totalNoOfCategories = await Categories.find(query).countDocuments();
+  res.status(200).send(totalNoOfCategories + "");
+});
+
+router.post("/pfs", async (req, res) => {
+  const { pageSize, currentPage, title } = req.body;
+
+  let skip = 0;
+  let limit = 0;
+  let query = {};
+  if (pageSize && currentPage) {
+    skip = (currentPage - 1) * pageSize;
+    limit = pageSize;
+  }
+
+  if (title) {
+    query["name"] = new RegExp(`^${title}`, "i");
+  }
+
+  let categories = await Categories.find(query).limit(limit).skip(skip);
+  // console.log({ movies });
+  res.send(categories);
 });
 module.exports = router;

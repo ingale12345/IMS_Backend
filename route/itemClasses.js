@@ -8,9 +8,7 @@ const multer = require("multer");
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 router.post("/", upload.single("profile"), async (req, res) => {
-  const img = fs.readFileSync(
-    "D:\\Mudik_Trainee\\NODE JS\\Inventory\\NoImage.jpg"
-  );
+  const img = fs.readFileSync("D://project_Backend//NoImage.jpg");
 
   const category = await Categories.findById(req.body.category);
   if (!category)
@@ -120,5 +118,43 @@ router.delete("/:id", async (req, res) => {
   } catch (error) {
     console.log(error);
   }
+});
+
+router.post("/count", async (req, res) => {
+  const { title } = req.body;
+
+  // console.log({ title, genre });
+  let query = {};
+
+  // console.log(query);
+  if (!title) {
+    let itemClasses = await ItemClass.find(query);
+
+    return res.send(itemClasses.length + "");
+  }
+  query["name"] = new RegExp(`^${title}`, "i");
+  const totalNoOfItemClasses = await ItemClass.find(query).countDocuments();
+  res.status(200).send(totalNoOfItemClasses + "");
+});
+
+router.post("/pfs", async (req, res) => {
+  const { pageSize, currentPage, title } = req.body;
+  console.log({ pageSize, currentPage, title });
+
+  let skip = 0;
+  let limit = 0;
+  let query = {};
+  if (pageSize && currentPage) {
+    skip = (currentPage - 1) * pageSize;
+    limit = pageSize;
+  }
+
+  if (title) {
+    query["name"] = new RegExp(`^${title}`, "i");
+  }
+
+  let itemClasses = await ItemClass.find(query).limit(limit).skip(skip);
+  // console.log({ movies });
+  res.send(itemClasses);
 });
 module.exports = router;
