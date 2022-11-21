@@ -1,6 +1,9 @@
 const express = require("express");
 const { default: mongoose } = require("mongoose");
 const { Categories } = require("../Models/categoriesModel");
+const { ItemClass, itemClassesSchema } = require("../Models/itemClassModel");
+const { Item } = require("../Models/itemModel");
+const { ShopItem } = require("../Models/shopItemModel");
 const router = express.Router();
 const { Shop, shopSchema } = require("../Models/shopModel");
 const { User } = require("../Models/userModel");
@@ -119,4 +122,76 @@ router.delete("/:id", async (req, res) => {
     console.log(error);
   }
 });
+
+//____________________Changes__________________
+router.get("/shopscategory/data", async (req, res) => {
+  const categories = await Categories.find();
+  const shops = await Shop.find();
+  let categorywiseShops = {};
+  categories.forEach((category) => {
+    categorywiseShops[category._id] = [];
+    shops.forEach((shop) => {
+      if (shop.category.equals(category._id)) {
+        categorywiseShops[category._id].push(shop);
+      }
+    });
+  });
+
+  res.send(categorywiseShops);
+});
+
+router.post("/shopsbycategory", async (req, res) => {
+  console.log(req.body.categoryId);
+  const shops = await Shop.find({ category: req.body.categoryId });
+  res.send(shops);
+});
+
+router.post("/shopdata", async (req, res) => {
+  const shopId = req.body.shopId;
+  let shopData = {};
+  console.log(shopId);
+  //shopItems
+  const shopItems = await ShopItem.find({ shop: shopId });
+  const allItems = await Item.find();
+
+  //Items
+  const items = [];
+  shopItems.forEach((shopItem) => {
+    allItems.forEach((item) => {
+      if (item._id.equals(shopItem.item)) {
+        items.push(item);
+      }
+    });
+  });
+
+  //ItemClasses
+  const shop = await Shop.findById(shopId);
+  const allItemClasses = await ItemClass.find(
+    { category: shop?.category },
+    { name: 1 }
+  );
+
+  let itemClasses = [];
+  allItemClasses.map((itemClass) => {
+    const item = items.filter((item) => {
+      return itemClass._id.equals(item.itemClass);
+    });
+
+    if (item.length != 0) {
+      itemClasses.push({
+        itemClass: itemClass.name,
+        noOfItems: item.length,
+        item: item,
+      });
+    }
+  });
+
+  shopData = {
+    shopItems: shopItems,
+    shopName: shop.name,
+    itemClasses: itemClasses,
+  };
+  res.send(shopData);
+});
+
 module.exports = router;
