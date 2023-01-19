@@ -4,6 +4,47 @@ const { Categories } = require("../Models/categoriesModel");
 const router = express.Router();
 const { Shop, shopSchema } = require("../Models/shopModel");
 const { User } = require("../Models/userModel");
+
+router.post("/count", async (req, res) => {
+  const { title, owner } = req.body;
+  let query = {};
+  query["owner"] = owner;
+  if (title) {
+    const regex = new RegExp(`^${title}`, "i");
+    query["name"] = regex;
+  }
+  const totalNoOfShops = await Shop.find(query).count();
+  res.status(200).send(totalNoOfShops + "");
+});
+
+router.get("/byShopOwner/:id", async (req, res) => {
+  try {
+    const shops = await Shop.find({ owner: req.params.id });
+    if (shops.length === 0)
+      return res.status(400).send("Shop is not found with given Id");
+    res.status(200).send(shops);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+router.post("/PFS/", async (req, res) => {
+  const { pageSize, currentPage, title, owner } = req.body;
+  let skip = 0;
+  let limit = 0;
+  let query = { owner };
+  if (title) {
+    const regex = new RegExp(`^${title}`, "i");
+    query["name"] = regex;
+  }
+  if (pageSize && currentPage) {
+    skip = (currentPage - 1) * pageSize;
+    limit = pageSize;
+  }
+  const shops = await Shop.find(query).skip(skip).limit(limit);
+  res.status(200).send(shops);
+});
+
 router.post("/", async (req, res) => {
   function randomString(length) {
     let chars = "0123456789";

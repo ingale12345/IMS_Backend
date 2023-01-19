@@ -5,6 +5,7 @@ const fs = require("fs");
 const sharp = require("sharp");
 const { ItemClass, itemClassesSchema } = require("../Models/itemClassModel");
 const multer = require("multer");
+const { Shop } = require("../Models/shopModel");
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 router.post("/", upload.single("profile"), async (req, res) => {
@@ -46,6 +47,18 @@ router.get("/", async (req, res) => {
   }
 });
 
+router.get("/byShopCategory/:id", async (req, res) => {
+  try {
+    const shop = await Shop.findById(req.params.id);
+    if (!shop) return res.status(400).send("Shop not availabe");
+    const itemClasses = await ItemClass.find({ category: shop.category });
+    if (itemClasses.length === 0)
+      return res.status(400).send("ItemClass is not found with given Id");
+    res.status(200).send(itemClasses);
+  } catch (error) {
+    console.log(error);
+  }
+});
 router.post("/search", async (req, res) => {
   try {
     const regEx = new RegExp(`^${req.body.searchValue}`, "i");

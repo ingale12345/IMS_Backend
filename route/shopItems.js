@@ -24,6 +24,16 @@ router.get("/:id", async (req, res) => {
     console.log(error);
   }
 });
+router.get("/byShop/:id", async (req, res) => {
+  try {
+    const shopItems = await ShopItem.find({ shop: req.params.id });
+    if (shopItems.length === 0)
+      return res.status(400).send("ShopItem is not found with given Id");
+    res.status(200).send(shopItems);
+  } catch (error) {
+    console.log(error);
+  }
+});
 
 router.post("/", async (req, res) => {
   const shop = await Shop.findById(req.body.shop);
