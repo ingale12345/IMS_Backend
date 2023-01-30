@@ -65,7 +65,6 @@ router.patch("/changePassword", async (req, res) => {
   } else {
     return res.status(200).send({ email: "", otpStatus: "Invalid Email" });
   }
-  // return res.status(200).send("Demo");
 });
 
 router.post("/", upload.single("profile"), async (req, res) => {

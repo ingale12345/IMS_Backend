@@ -1,3 +1,5 @@
 {
-  "jwtPrivateKey": "inventory_jwtPrivateKey"
+  "jwtPrivateKey": "inventory_jwtPrivateKey",
+  "db_url": "inventory_db_url",
+  "PORT": "inventory_backend_port"
 }
