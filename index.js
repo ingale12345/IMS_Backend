@@ -13,7 +13,6 @@ const itemsRouter = require("./route/items");
 const shopItemsRouter = require("./route/shopItems");
 const requisitionRouter = require("./route/requisitions");
 const loginRouter = require("./route/login");
-
 const cors = require("cors");
 app.use(cors());
 app.use("/api/users/", userRouter);
