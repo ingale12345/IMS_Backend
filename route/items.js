@@ -6,10 +6,9 @@ const fs = require("fs");
 const multer = require("multer");
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
+const path = require("path");
 router.post("/", upload.single("profile"), async (req, res) => {
-  const img = fs.readFileSync(
-    "D:\\Mudik_Trainee\\NODE JS\\Inventory\\NoImage.jpg"
-  );
+  const img = fs.readFileSync(path.join(__dirname, "../NoImage.jpg"));
   const itemClass = await ItemClass.findById(req.body.itemClass);
   if (!itemClass)
     return res.status(404).send("Item Class is not found with given id");

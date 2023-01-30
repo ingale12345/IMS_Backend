@@ -8,11 +8,9 @@ const multer = require("multer");
 const { Shop } = require("../Models/shopModel");
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
+const path = require("path");
 router.post("/", upload.single("profile"), async (req, res) => {
-  const img = fs.readFileSync(
-    "D:\\Mudik_Trainee\\NODE JS\\Inventory\\NoImage.jpg"
-  );
-
+  const img = fs.readFileSync(path.join(__dirname, "../NoImage.jpg"));
   const category = await Categories.findById(req.body.category);
   if (!category)
     return res.status(404).send("Category is not found with given id");

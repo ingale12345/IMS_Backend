@@ -9,6 +9,7 @@ const { User, userSchema } = require("../Models/userModel");
 const sharp = require("sharp");
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
+const path = require("path");
 router.post("/generateOTP", async (req, res) => {
   function randomString(length) {
     let chars = "0123456789";
@@ -68,9 +69,7 @@ router.patch("/changePassword", async (req, res) => {
 });
 
 router.post("/", upload.single("profile"), async (req, res) => {
-  const img = fs.readFileSync(
-    "D:\\Mudik_Trainee\\NODE JS\\Inventory\\NoProfile.jpg"
-  );
+  const img = fs.readFileSync(path.join(__dirname, "../NoProfile.jpg"));
   const buffer = await sharp(req.file?.buffer || img)
     .resize({ width: 250, height: 250 })
     .toBuffer();
@@ -117,10 +116,6 @@ router.post("/", upload.single("profile"), async (req, res) => {
 });
 
 router.patch("/:id", upload.single("profile"), async (req, res) => {
-  const img = fs.readFileSync(
-    "D:\\Mudik_Trainee\\NODE JS\\Inventory\\NoProfile.jpg"
-  );
-
   let user;
   if (!req.file) {
     user = await User.findByIdAndUpdate(req.params.id, {
